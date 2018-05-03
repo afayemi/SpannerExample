@@ -14,6 +14,8 @@ import java.util.List;
 @SpringBootApplication
 public class DemoApplication {
 
+
+
     static class Singer {
 
         final long singerId;
@@ -136,50 +138,26 @@ public class DemoApplication {
 	public static void main(String[] args) {
         SpringApplication.run(DemoApplication.class, args);
 
+        //Client
         SpannerOptions options = SpannerOptions.newBuilder().build();
         Spanner spanner = options.getService();
-        try {
-            String command = args[0];
-            DatabaseId db = DatabaseId.of(options.getProjectId(), args[1], args[2]);
-            DatabaseClient dbClient = spanner.getDatabaseClient(db);
-            DatabaseAdminClient dbAdminClient = spanner.getDatabaseAdminClient();
 
-        } finally {
-            System.out.print("");
+        // Name of your instance & database.
+        String instanceId = "test-instance";
+        String databaseId = "example-db";
+        String projectId = "cloudkubernetesapp";
+        try{
+            // Creates a database client
+            DatabaseClient dbClient = spanner.getDatabaseClient(DatabaseId.of(
+                    projectId, instanceId, databaseId));
+        } finally{
+
         }
 
 
 
     }
 
-
-
-
-
-	static void createDatabase(DatabaseAdminClient dbAdminClient, DatabaseId id) {
-
-	    Operation<Database, CreateDatabaseMetadata> op;
-        op = dbAdminClient
-                .createDatabase(
-                        id.getInstanceId().getInstance(),
-                        id.getDatabase(),
-                        Arrays.asList(
-                                "CREATE TABLE Singers (\n"
-                                        + "  SingerId   INT64 NOT NULL,\n"
-                                        + "  FirstName  STRING(1024),\n"
-                                        + "  LastName   STRING(1024),\n"
-                                        + "  SingerInfo BYTES(MAX)\n"
-                                        + ") PRIMARY KEY (SingerId)",
-                                "CREATE TABLE Albums (\n"
-                                        + "  SingerId     INT64 NOT NULL,\n"
-                                        + "  AlbumId      INT64 NOT NULL,\n"
-                                        + "  AlbumTitle   STRING(MAX)\n"
-                                        + ") PRIMARY KEY (SingerId, AlbumId),\n"
-                                        + "  INTERLEAVE IN PARENT Singers ON DELETE CASCADE"));
-        Database db = op.waitFor().getResult();
-		System.out.println("Created database [" + db.getId() + "]");
-
-	}
 
 
 }
